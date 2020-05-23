@@ -10,7 +10,7 @@ readonly Project_Name="GRUB2::THEMES"
 readonly MAX_DELAY=20                               # max delay for user to enter root password
 tui_root_login=
 
-THEME_DIR="/usr/share/grub/themes"
+THEME_DIR="/usr/share/grub2/themes"
 REO_DIR="$(cd $(dirname $0) && pwd)"
 }
 
@@ -114,15 +114,39 @@ install() {
     # Copy theme
     prompt -i "\n Installing ${name} ${icon} ${screen} theme..."
 
-    cp -a "${REO_DIR}/common/"* "${THEME_DIR}/${name}"
+    # Copy fonts
+    case $screen in
+        1080p)
+            cp -a ${REO_DIR}/common/terminus-{18,24}.pf2 "${THEME_DIR}/${name}"
+            ;;
+        1080p_21:9)
+            cp -a ${REO_DIR}/common/terminus-14.pf2 "${THEME_DIR}/${name}"
+            ;;
+        2k)
+            cp -a ${REO_DIR}/common/terminus-18.pf2 "${THEME_DIR}/${name}"
+            cp -a ${REO_DIR}/common/dejavu_sans_24.pf2 "${THEME_DIR}/${name}"
+            ;;
+        4k)
+            cp -a ${REO_DIR}/common/terminus-18.pf2 "${THEME_DIR}/${name}"
+            cp -a ${REO_DIR}/common/dejavu_sans_32.pf2 "${THEME_DIR}/${name}"
+            ;;
+    esac
+
+    cp -a "${REO_DIR}/common/*.png" "${THEME_DIR}/${name}"
     cp -a "${REO_DIR}/config/theme-${screen}.txt" "${THEME_DIR}/${name}/theme.txt"
     if [[ ${screen} == '1080p_21:9' ]]; then
       cp -a "${REO_DIR}/backgrounds/${screen}/background-${theme}.png" "${THEME_DIR}/${name}/background.png"
     else
       cp -a "${REO_DIR}/backgrounds/${screen}/background-${theme}.jpg" "${THEME_DIR}/${name}/background.jpg"
     fi
-    cp -a "${REO_DIR}/assets/assets-${icon}/icons-${screen}" "${THEME_DIR}/${name}/icons"
-    cp -a "${REO_DIR}/assets/assets-${icon}/select-${screen}/"*.png "${THEME_DIR}/${name}"
+
+    if [ "$screen" = "1080p" ]; then
+        screen2=2k
+    else
+        screen2="$screen"
+    fi
+    cp -a "${REO_DIR}/assets/assets-${icon}/icons-${screen2}" "${THEME_DIR}/${name}/icons"
+    cp -a "${REO_DIR}/assets/assets-${icon}/select-${screen2}/"*.png "${THEME_DIR}/${name}"
 
     # Set theme
     prompt -i "\n Setting ${name} as default..."
@@ -340,7 +364,7 @@ while [[ $# -ge 1 ]]; do
   ORIGINAL_ARGUMENTS="$ORIGINAL_ARGUMENTS $1"
   case "${1}" in
     -b|--boot)
-      THEME_DIR="/boot/grub/themes"
+      THEME_DIR="/boot/grub2/themes"
       ;;
     -l|--slaze)
       theme='slaze'
